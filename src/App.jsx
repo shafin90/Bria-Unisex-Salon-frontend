@@ -3,7 +3,13 @@ import { useState, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Components
+// Public Components
+import PublicLayout from './components/Public/PublicLayout';
+import Home from './pages/Public/Home';
+import PublicServices from './pages/Public/Services';
+import BookAppointment from './pages/Public/BookAppointment';
+
+// Admin Components
 import Layout from './components/Layout/Layout';
 import Login from './pages/Auth/Login';
 import Dashboard from './pages/Dashboard/Dashboard';
@@ -32,24 +38,48 @@ function AppContent() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
-        {isAuthenticated ? (
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/bookings" element={<Bookings />} />
-              <Route path="/offers" element={<Offers />} />
-              <Route path="/users" element={<Users />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </Layout>
-        ) : (
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        )}
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={
+            <PublicLayout>
+              <Home />
+            </PublicLayout>
+          } />
+          <Route path="/services" element={
+            <PublicLayout>
+              <PublicServices />
+            </PublicLayout>
+          } />
+          <Route path="/book" element={
+            <PublicLayout>
+              <BookAppointment />
+            </PublicLayout>
+          } />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<Login />} />
+          
+          {isAuthenticated ? (
+            <Route path="/admin/*" element={
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/bookings" element={<Bookings />} />
+                  <Route path="/offers" element={<Offers />} />
+                  <Route path="/users" element={<Users />} />
+                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                </Routes>
+              </Layout>
+            } />
+          ) : (
+            <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
+          )}
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
     </Router>
   );
