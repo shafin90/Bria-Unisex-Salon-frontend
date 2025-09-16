@@ -10,7 +10,8 @@ const ServiceModal = ({ service, onClose, onSave }) => {
     price: '',
     category: 'men',
     serviceType: '',
-    img: ''
+    img: '',
+    imgFile: null
   });
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState('');
@@ -56,12 +57,13 @@ const ServiceModal = ({ service, onClose, onSave }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
-        setFormData(prev => ({
-          ...prev,
-          img: e.target.result
-        }));
       };
       reader.readAsDataURL(file);
+      // Store the file for upload
+      setFormData(prev => ({
+        ...prev,
+        imgFile: file
+      }));
     }
   };
 
@@ -70,18 +72,34 @@ const ServiceModal = ({ service, onClose, onSave }) => {
     setLoading(true);
 
     try {
-      const serviceData = {
-        ...formData,
-        price: parseFloat(formData.price)
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('serviceName', formData.serviceName);
+      formDataToSend.append('serviceDescription', formData.serviceDescription);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('serviceType', formData.serviceType);
+      
+      // Add image file if it exists
+      if (formData.imgFile) {
+        formDataToSend.append('img', formData.imgFile);
+      }
 
       let response;
       if (service) {
         // Update existing service
-        response = await axios.put(`${API_BASE_URL}/service/editService/${service._id}`, serviceData);
+        response = await axios.put(`${API_BASE_URL}/service/editService/${service._id}`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       } else {
         // Create new service
-        response = await axios.post(`${API_BASE_URL}/service/addService`, serviceData);
+        response = await axios.post(`${API_BASE_URL}/service/addService`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       }
 
       onSave(response.data);

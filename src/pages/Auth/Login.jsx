@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Scissors, Eye, EyeOff } from 'lucide-react';
 import { gsap } from 'gsap';
@@ -12,6 +13,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Animate login form
@@ -41,7 +43,10 @@ const Login = () => {
 
     const result = await login(formData.email, formData.password);
     
-    if (!result.success) {
+    if (result.success) {
+      // Navigate to admin dashboard on successful login
+      navigate('/admin/dashboard');
+    } else {
       setError(result.error);
     }
     

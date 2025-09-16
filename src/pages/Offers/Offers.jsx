@@ -147,6 +147,8 @@ const Offers = () => {
   };
 
   const isOfferActive = (offer) => {
+    if (!offer?.startDate || !offer?.endDate || !offer?.status) return false;
+    
     const today = new Date();
     const startDate = new Date(offer.startDate.split('-').reverse().join('-'));
     const endDate = new Date(offer.endDate.split('-').reverse().join('-'));
@@ -155,6 +157,8 @@ const Offers = () => {
   };
 
   const getDaysRemaining = (endDate) => {
+    if (!endDate) return 0;
+    
     const today = new Date();
     const end = new Date(endDate.split('-').reverse().join('-'));
     const diffTime = end - today;
@@ -163,10 +167,11 @@ const Offers = () => {
   };
 
   const filteredOffers = Array.isArray(offers) ? offers.filter(offer => {
-    const matchesSearch = offer.offerName.toLowerCase().includes(searchTerm.toLowerCase());
+    const offerName = offer?.offerName || '';
+    const matchesSearch = offerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'active' && offer.status === 'Active') ||
-                         (filterStatus === 'inactive' && offer.status === 'Inactive');
+                         (filterStatus === 'active' && offer?.status === 'Active') ||
+                         (filterStatus === 'inactive' && offer?.status === 'Inactive');
     return matchesSearch && matchesStatus;
   }) : [];
 
@@ -214,7 +219,7 @@ const Offers = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Active Offers</p>
               <p className="text-2xl font-bold text-gray-900">
-                {offers.filter(o => o.status === 'Active').length}
+                {offers.filter(o => o?.status === 'Active').length}
               </p>
             </div>
             <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
@@ -228,7 +233,7 @@ const Offers = () => {
             <div>
               <p className="text-sm font-medium text-gray-600">Inactive Offers</p>
               <p className="text-2xl font-bold text-gray-900">
-                {offers.filter(o => o.status === 'Inactive').length}
+                {offers.filter(o => o?.status === 'Inactive').length}
               </p>
             </div>
             <div className="w-12 h-12 bg-gray-500 rounded-lg flex items-center justify-center">
@@ -278,7 +283,7 @@ const Offers = () => {
             <div className="relative">
               <img
                 src={offer.offerImg || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
-                alt={offer.offerName}
+                alt={offer?.offerName || 'Offer'}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
               <div className="absolute top-4 right-4">
@@ -296,11 +301,11 @@ const Offers = () => {
             
             <div className="space-y-3">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{offer.offerName}</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{offer?.offerName || 'Untitled Offer'}</h3>
                 <div className="flex items-center space-x-4 text-sm text-gray-600 mt-2">
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
-                    <span>{offer.startDate} - {offer.endDate}</span>
+                    <span>{offer?.startDate || 'N/A'} - {offer?.endDate || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -308,11 +313,11 @@ const Offers = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1 text-sm text-gray-500">
                   <Users className="w-4 h-4" />
-                  <span>Limit: {offer.usageLimit}</span>
+                  <span>Limit: {offer?.usageLimit || 'N/A'}</span>
                 </div>
                 <div className="text-sm text-gray-500">
-                  {getDaysRemaining(offer.endDate) > 0 
-                    ? `${getDaysRemaining(offer.endDate)} days left`
+                  {getDaysRemaining(offer?.endDate) > 0 
+                    ? `${getDaysRemaining(offer?.endDate)} days left`
                     : 'Expired'
                   }
                 </div>

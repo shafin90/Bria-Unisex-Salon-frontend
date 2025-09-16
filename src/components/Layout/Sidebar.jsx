@@ -15,11 +15,11 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { logout } = useAuth();
 
   const menuItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/services', icon: Scissors, label: 'Services' },
-    { path: '/bookings', icon: Calendar, label: 'Bookings' },
-    { path: '/offers', icon: Gift, label: 'Offers' },
-    { path: '/users', icon: Users, label: 'Users' },
+    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/services', icon: Scissors, label: 'Services' },
+    { path: '/admin/bookings', icon: Calendar, label: 'Bookings' },
+    { path: '/admin/offers', icon: Gift, label: 'Offers' },
+    { path: '/admin/users', icon: Users, label: 'Users' },
   ];
 
   const handleLogout = () => {

@@ -40,7 +40,9 @@ const Services = () => {
   const fetchServices = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/service/getAllService`);
-      setServices(Array.isArray(response.data) ? response.data : []);
+      // Handle paginated response from backend
+      const servicesData = response.data?.services || response.data;
+      setServices(Array.isArray(servicesData) ? servicesData : []);
     } catch (error) {
       console.error('Error fetching services:', error);
       // Mock data for demo
@@ -131,9 +133,11 @@ const Services = () => {
   };
 
   const filteredServices = Array.isArray(services) ? services.filter(service => {
-    const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || service.category === filterCategory;
+    const serviceName = service?.serviceName || '';
+    const serviceDescription = service?.serviceDescription || '';
+    const matchesSearch = serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || service?.category === filterCategory;
     return matchesSearch && matchesCategory;
   }) : [];
 
@@ -201,39 +205,39 @@ const Services = () => {
           <div key={service._id} className="service-card card-hover">
             <div className="relative">
               <img
-                src={service.img || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
-                alt={service.serviceName}
+                src={service?.img || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400'}
+                alt={service?.serviceName || 'Service'}
                 className="w-full h-48 object-cover rounded-lg mb-4"
               />
               <div className="absolute top-4 right-4">
                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  service.category === 'men' 
+                  service?.category === 'men' 
                     ? 'bg-blue-100 text-blue-800' 
                     : 'bg-pink-100 text-pink-800'
                 }`}>
-                  {service.category}
+                  {service?.category || 'N/A'}
                 </span>
               </div>
             </div>
             
             <div className="space-y-3">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{service.serviceName}</h3>
-                <p className="text-gray-600 text-sm line-clamp-2">{service.serviceDescription}</p>
+                <h3 className="text-lg font-semibold text-gray-900">{service?.serviceName || 'Untitled Service'}</h3>
+                <p className="text-gray-600 text-sm line-clamp-2">{service?.serviceDescription || 'No description available'}</p>
               </div>
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Users className="w-4 h-4" />
-                    <span>{service.bookingCount}</span>
+                    <span>{service?.bookingCount || 0}</span>
                   </div>
                   <span className="px-2 py-1 bg-gray-100 rounded text-xs">
-                    {service.serviceType}
+                    {service?.serviceType || 'N/A'}
                   </span>
                 </div>
                 <span className="text-xl font-bold text-primary-600">
-                  ${service.price}
+                  ${service?.price || '0.00'}
                 </span>
               </div>
               

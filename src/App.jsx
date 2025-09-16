@@ -6,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // Public Components
 import PublicLayout from './components/Public/PublicLayout';
 import Home from './pages/Public/Home';
-import PublicServices from './pages/Public/Services';
 import BookAppointment from './pages/Public/BookAppointment';
 
 // Admin Components
@@ -20,6 +19,7 @@ import Users from './pages/Users/Users';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -43,11 +43,6 @@ function AppContent() {
           <Route path="/" element={
             <PublicLayout>
               <Home />
-            </PublicLayout>
-          } />
-          <Route path="/services" element={
-            <PublicLayout>
-              <PublicServices />
             </PublicLayout>
           } />
           <Route path="/book" element={
@@ -88,7 +83,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </AuthProvider>
   );
 }

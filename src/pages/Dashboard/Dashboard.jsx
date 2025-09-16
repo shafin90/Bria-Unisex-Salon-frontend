@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { gsap } from 'gsap';
 import { 
   Users, 
   Scissors, 
@@ -25,19 +24,49 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    
-    // Animate dashboard cards
-    gsap.fromTo('.dashboard-card', 
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out' }
-    );
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch dashboard data from backend
-      const response = await axios.get(`${API_BASE_URL}/dashboard/getDashboardData`);
-      setDashboardData(response.data);
+      // Fetch services from backend
+      const servicesResponse = await axios.get(`${API_BASE_URL}/service/getAllService`);
+      const servicesData = servicesResponse.data?.services || servicesResponse.data;
+      const services = Array.isArray(servicesData) ? servicesData : [];
+
+      // Fetch bookings from backend
+      const bookingsResponse = await axios.get(`${API_BASE_URL}/booking/getAllBooking`);
+      const bookingsData = bookingsResponse.data?.bookings || bookingsResponse.data;
+      const bookings = Array.isArray(bookingsData) ? bookingsData : [];
+
+      // Calculate dashboard metrics
+      const totalServices = services.length;
+      const totalBookings = bookings.length;
+      const totalUsers = new Set(bookings.map(booking => booking.phoneNumber)).size;
+
+      // Get recent bookings (last 5)
+      const recentBookings = bookings.slice(0, 5).map(booking => ({
+        name: booking.name || 'Unknown',
+        service: booking.service?.[0]?.serviceName || 'Service',
+        time: booking.time || 'N/A',
+        status: 'confirmed'
+      }));
+
+      // Get top services based on booking count
+      const topServices = services
+        .sort((a, b) => (b.bookingCount || 0) - (a.bookingCount || 0))
+        .slice(0, 3)
+        .map(service => ({
+          name: service.serviceName || 'Service',
+          bookings: service.bookingCount || 0
+        }));
+
+      setDashboardData({
+        totalBookings,
+        totalServices,
+        totalUsers,
+        recentBookings,
+        topServices
+      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       // Set mock data for demo
@@ -95,33 +124,33 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="text-gray-500">Loading dashboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome back! Here's what's happening at Bria Salon.</p>
+      <div className="border-b border-gray-200 pb-4">
+        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">Overview of salon operations and metrics</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="dashboard-card card-hover">
+            <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                  <p className="text-sm text-green-600 mt-1">{stat.change} from last month</p>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.title}</p>
+                  <p className="text-2xl font-semibold text-gray-900 mt-1">{stat.value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{stat.change} from last month</p>
                 </div>
-                <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
-                  <Icon className="w-6 h-6 text-white" />
+                <div className={`w-10 h-10 ${stat.color} rounded-md flex items-center justify-center`}>
+                  <Icon className="w-5 h-5 text-white" />
                 </div>
               </div>
             </div>
@@ -130,102 +159,113 @@ const Dashboard = () => {
       </div>
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Bookings</h2>
-            <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-              View All
-            </button>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Recent Bookings</h2>
+              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                View All
+              </button>
+            </div>
           </div>
+          <div className="p-6">
           
-          <div className="space-y-4">
-            {dashboardData.recentBookings.map((booking, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                    <Users className="w-5 h-5 text-primary-600" />
+            <div className="space-y-3">
+              {dashboardData.recentBookings.map((booking, index) => (
+                <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <Users className="w-4 h-4 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{booking.name}</p>
+                      <p className="text-xs text-gray-500">{booking.service}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{booking.name}</p>
-                    <p className="text-sm text-gray-600">{booking.service}</p>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-gray-900">{booking.time}</p>
+                    <div className="flex items-center mt-1">
+                      {booking.status === 'confirmed' ? (
+                        <CheckCircle className="w-3 h-3 text-green-500 mr-1" />
+                      ) : (
+                        <Clock className="w-3 h-3 text-yellow-500 mr-1" />
+                      )}
+                      <span className={`text-xs font-medium ${
+                        booking.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
+                      }`}>
+                        {booking.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{booking.time}</p>
-                  <div className="flex items-center mt-1">
-                    {booking.status === 'confirmed' ? (
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
-                    ) : (
-                      <Clock className="w-4 h-4 text-yellow-500 mr-1" />
-                    )}
-                    <span className={`text-xs font-medium ${
-                      booking.status === 'confirmed' ? 'text-green-600' : 'text-yellow-600'
-                    }`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Top Services */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Top Services</h2>
-            <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-              View All
-            </button>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Top Services</h2>
+              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                View All
+              </button>
+            </div>
           </div>
-          
-          <div className="space-y-4">
-            {dashboardData.topServices.map((service, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center">
-                    <span className="text-sm font-bold text-primary-600">{index + 1}</span>
+          <div className="p-6">
+            <div className="space-y-4">
+              {dashboardData.topServices.map((service, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-gray-100 rounded flex items-center justify-center">
+                      <span className="text-xs font-medium text-gray-600">{index + 1}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{service.name}</p>
+                      <p className="text-xs text-gray-500">{service.bookings} bookings</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{service.name}</p>
-                    <p className="text-sm text-gray-600">{service.bookings} bookings</p>
+                  <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                    <div 
+                      className="bg-blue-600 h-1.5 rounded-full"
+                      style={{ width: `${(service.bookings / 50) * 100}%` }}
+                    ></div>
                   </div>
                 </div>
-                <div className="w-20 bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-primary-600 h-2 rounded-full"
-                    style={{ width: `${(service.bookings / 50) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="p-4 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors duration-200 text-left">
-            <Scissors className="w-8 h-8 text-primary-600 mb-2" />
-            <h3 className="font-medium text-gray-900">Add New Service</h3>
-            <p className="text-sm text-gray-600">Create a new salon service</p>
-          </button>
-          
-          <button className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors duration-200 text-left">
-            <Calendar className="w-8 h-8 text-green-600 mb-2" />
-            <h3 className="font-medium text-gray-900">View Bookings</h3>
-            <p className="text-sm text-gray-600">Manage appointments</p>
-          </button>
-          
-          <button className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors duration-200 text-left">
-            <TrendingUp className="w-8 h-8 text-purple-600 mb-2" />
-            <h3 className="font-medium text-gray-900">View Analytics</h3>
-            <p className="text-sm text-gray-600">Check performance metrics</p>
-          </button>
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-medium text-gray-900">Quick Actions</h2>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-left">
+              <Scissors className="w-6 h-6 text-gray-600 mb-3" />
+              <h3 className="text-sm font-medium text-gray-900">Add New Service</h3>
+              <p className="text-xs text-gray-500 mt-1">Create a new salon service</p>
+            </button>
+            
+            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-left">
+              <Calendar className="w-6 h-6 text-gray-600 mb-3" />
+              <h3 className="text-sm font-medium text-gray-900">View Bookings</h3>
+              <p className="text-xs text-gray-500 mt-1">Manage appointments</p>
+            </button>
+            
+            <button className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-left">
+              <TrendingUp className="w-6 h-6 text-gray-600 mb-3" />
+              <h3 className="text-sm font-medium text-gray-900">View Analytics</h3>
+              <p className="text-xs text-gray-500 mt-1">Check performance metrics</p>
+            </button>
+          </div>
         </div>
       </div>
     </div>

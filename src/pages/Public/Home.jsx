@@ -21,6 +21,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -32,40 +33,70 @@ const Home = () => {
   const testimonialsRef = useRef(null);
   const ctaRef = useRef(null);
 
-  const [services] = useState([
-    {
-      name: 'Hair Cut & Style',
-      description: 'Professional haircut with modern styling techniques',
-      price: 45,
-      image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
-      category: 'Hair',
-      popular: true
-    },
-    {
-      name: 'Hair Color',
-      description: 'Expert hair coloring and highlights',
-      price: 120,
-      image: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400',
-      category: 'Hair',
-      popular: false
-    },
-    {
-      name: 'Beard Trim',
-      description: 'Professional beard trimming and shaping',
-      price: 25,
-      image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3d1?w=400',
-      category: 'Beard',
-      popular: true
-    },
-    {
-      name: 'Facial Treatment',
-      description: 'Deep cleansing and rejuvenating facial',
-      price: 80,
-      image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400',
-      category: 'Facial',
-      popular: false
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE_URL = 'http://localhost:8000';
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/service/getAllService`);
+      // Handle paginated response from backend
+      const servicesData = response.data?.services || response.data;
+      const formattedServices = Array.isArray(servicesData) ? servicesData.map(service => ({
+        name: service?.serviceName || 'Service',
+        description: service?.serviceDescription || 'Professional service',
+        price: service?.price || 0,
+        image: service?.img || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
+        category: service?.serviceType || 'General',
+        popular: service?.bookingCount > 20 || false
+      })) : [];
+      setServices(formattedServices);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      // Fallback mock data
+      setServices([
+        {
+          name: 'Hair Cut & Style',
+          description: 'Professional haircut with modern styling techniques',
+          price: 45,
+          image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400',
+          category: 'Hair',
+          popular: true
+        },
+        {
+          name: 'Hair Color',
+          description: 'Expert hair coloring and highlights',
+          price: 120,
+          image: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400',
+          category: 'Hair',
+          popular: false
+        },
+        {
+          name: 'Beard Trim',
+          description: 'Professional beard trimming and shaping',
+          price: 25,
+          image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3d1?w=400',
+          category: 'Beard',
+          popular: true
+        },
+        {
+          name: 'Facial Treatment',
+          description: 'Deep cleansing and rejuvenating facial',
+          price: 80,
+          image: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=400',
+          category: 'Facial',
+          popular: false
+        }
+      ]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
   const [testimonials] = useState([
     {
@@ -440,10 +471,10 @@ const Home = () => {
           
           <div className="text-center mt-20">
             <Link 
-              to="/services" 
+              to="/book" 
               className="group bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 inline-flex items-center space-x-3 text-lg shadow-lg hover:shadow-xl"
             >
-              <span>View All Services</span>
+              <span>Book Appointment</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           </div>

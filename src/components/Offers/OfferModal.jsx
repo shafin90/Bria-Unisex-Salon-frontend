@@ -7,6 +7,7 @@ const OfferModal = ({ offer, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     offerName: '',
     offerImg: '',
+    offerImgFile: null,
     startDate: '',
     endDate: '',
     usageLimit: '',
@@ -56,12 +57,13 @@ const OfferModal = ({ offer, onClose, onSave }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
-        setFormData(prev => ({
-          ...prev,
-          offerImg: e.target.result
-        }));
       };
       reader.readAsDataURL(file);
+      // Store the file for upload
+      setFormData(prev => ({
+        ...prev,
+        offerImgFile: file
+      }));
     }
   };
 
@@ -70,18 +72,34 @@ const OfferModal = ({ offer, onClose, onSave }) => {
     setLoading(true);
 
     try {
-      const offerData = {
-        ...formData,
-        usageLimit: parseInt(formData.usageLimit)
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('offerName', formData.offerName);
+      formDataToSend.append('startDate', formData.startDate);
+      formDataToSend.append('endDate', formData.endDate);
+      formDataToSend.append('usageLimit', formData.usageLimit);
+      formDataToSend.append('status', formData.status);
+      
+      // Add image file if it exists
+      if (formData.offerImgFile) {
+        formDataToSend.append('offerImg', formData.offerImgFile);
+      }
 
       let response;
       if (offer) {
         // Update existing offer
-        response = await axios.put(`${API_BASE_URL}/offer/editOffer/${offer._id}`, offerData);
+        response = await axios.put(`${API_BASE_URL}/offer/editOffer/${offer._id}`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       } else {
         // Create new offer
-        response = await axios.post(`${API_BASE_URL}/offer/addOffer`, offerData);
+        response = await axios.post(`${API_BASE_URL}/offer/addOffer`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
       }
 
       onSave(response.data);

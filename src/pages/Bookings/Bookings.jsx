@@ -20,12 +20,27 @@ const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedDate, setSelectedDate] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalBookings, setTotalBookings] = useState(0);
+  const [itemsPerPage] = useState(12);
 
   const API_BASE_URL = 'http://localhost:8000';
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchBookings();
+    }
+  }, [searchTerm, filterStatus, selectedDate]);
 
   // Animate bookings list after bookings are loaded
   useEffect(() => {
@@ -39,8 +54,24 @@ const Bookings = () => {
 
   const fetchBookings = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/booking/getAllBooking`);
-      setBookings(Array.isArray(response.data) ? response.data : []);
+      const response = await axios.get(`${API_BASE_URL}/booking/getAllBooking`, {
+        params: {
+          page: currentPage,
+          limit: itemsPerPage
+        }
+      });
+      
+      // Handle paginated response from backend
+      if (response.data.bookings) {
+        setBookings(Array.isArray(response.data.bookings) ? response.data.bookings : []);
+        setTotalPages(response.data.totalPages || 1);
+        setTotalBookings(response.data.totalBookings || 0);
+      } else {
+        // Fallback for non-paginated response
+        setBookings(Array.isArray(response.data) ? response.data : []);
+        setTotalPages(1);
+        setTotalBookings(response.data.length || 0);
+      }
     } catch (error) {
       console.error('Error fetching bookings:', error);
       // Mock data for demo
@@ -131,6 +162,8 @@ const Bookings = () => {
     }
   };
 
+
+
   const filteredBookings = Array.isArray(bookings) ? bookings.filter(booking => {
     const matchesSearch = booking.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          booking.phoneNumber.includes(searchTerm) ||
@@ -168,7 +201,7 @@ const Bookings = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Bookings</p>
-              <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{totalBookings}</p>
             </div>
             <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
               <Calendar className="w-6 h-6 text-white" />
@@ -262,7 +295,13 @@ const Bookings = () => {
 
       {/* Bookings List */}
       <div className="space-y-4">
-        {filteredBookings.map((booking) => (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span className="ml-3 text-gray-600">Loading bookings...</span>
+          </div>
+        ) : (
+          filteredBookings.map((booking) => (
           <div key={booking._id} className="booking-item card-hover">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="flex-1">
@@ -344,10 +383,11 @@ const Bookings = () => {
               </div>
             </div>
           </div>
-        ))}
+        ))
+        )}
       </div>
 
-      {filteredBookings.length === 0 && (
+      {!loading && filteredBookings.length === 0 && (
         <div className="text-center py-12">
           <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings found</h3>
@@ -357,6 +397,64 @@ const Bookings = () => {
               : 'No bookings have been made yet'
             }
           </p>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalBookings)} of {totalBookings} bookings
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                        currentPage === pageNum
+                          ? 'bg-primary-600 text-white'
+                          : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

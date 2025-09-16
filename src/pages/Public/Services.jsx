@@ -6,16 +6,24 @@ import {
   Search,
   ChevronRight,
   Clock,
-  Users
+  Users,
+  ShoppingCart,
+  Plus,
+  CheckCircle,
+  X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useCart } from '../../context/CartContext';
 
 const PublicServices = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const { addToCart, getCartItemCount } = useCart();
 
   const API_BASE_URL = 'http://localhost:8000';
 
@@ -36,9 +44,13 @@ const PublicServices = () => {
   const fetchServices = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/service/getAllService`);
-      setServices(Array.isArray(response.data) ? response.data : []);
+      // Handle paginated response from backend
+      const servicesData = response.data?.services || response.data;
+      console.log('Services fetched:', servicesData);
+      setServices(Array.isArray(servicesData) ? servicesData : []);
     } catch (error) {
       console.error('Error fetching services:', error);
+      console.log('Using mock data');
       // Mock data for demo
       setServices([
         {
@@ -107,17 +119,29 @@ const PublicServices = () => {
     }
   };
 
+  const handleAddToCart = (service) => {
+    addToCart(service);
+    setToastMessage(`${service.serviceName} added to cart!`);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   const filteredServices = Array.isArray(services) ? services.filter(service => {
-    const matchesSearch = service.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || service.category === filterCategory;
+    const serviceName = service?.serviceName || '';
+    const serviceDescription = service?.serviceDescription || '';
+    const matchesSearch = serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'all' || service?.category === filterCategory;
     return matchesSearch && matchesCategory;
   }) : [];
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading services...</p>
+        </div>
       </div>
     );
   }
@@ -208,19 +232,31 @@ const PublicServices = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div>
-                      <span className="text-2xl font-bold text-primary-600">${service.price}</span>
-                      <span className="text-sm text-gray-500 ml-1">starting from</span>
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-2xl font-bold text-primary-600">${service.price}</span>
+                        <span className="text-sm text-gray-500 ml-1">starting from</span>
+                      </div>
                     </div>
-                    <Link 
-                      to="/book" 
-                      state={{ selectedService: service }}
-                      className="btn-primary flex items-center space-x-2"
-                    >
-                      <span>Book Now</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
+                    
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleAddToCart(service)}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Add to Cart</span>
+                      </button>
+                      <Link 
+                        to="/book" 
+                        state={{ selectedService: service }}
+                        className="flex-1 btn-primary flex items-center justify-center space-x-2"
+                      >
+                        <span>Book Now</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -258,6 +294,22 @@ const PublicServices = () => {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 animate-slide-up">
+            <CheckCircle className="w-5 h-5" />
+            <span className="font-medium">{toastMessage}</span>
+            <button
+              onClick={() => setShowToast(false)}
+              className="ml-2 text-white/80 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,7 +24,6 @@ const PublicLayout = ({ children }) => {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'Services', href: '/services' },
     { name: 'Book Appointment', href: '/book' },
   ];
 
@@ -63,7 +62,7 @@ const PublicLayout = ({ children }) => {
             </nav>
 
             {/* CTA Button */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-4">
               <Link
                 to="/book"
                 className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl"
