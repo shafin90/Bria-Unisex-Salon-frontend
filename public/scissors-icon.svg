@@ -1,0 +1,28 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scissorsGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="scissorsGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" fill="url(#scissorsGradient1)" stroke="white" stroke-width="2"/>
+  
+  <!-- Scissors handle 1 -->
+  <path d="M8 8 L12 12 L10 14 L6 10 Z" fill="url(#scissorsGradient1)"/>
+  
+  <!-- Scissors handle 2 -->
+  <path d="M24 8 L20 12 L22 14 L26 10 Z" fill="url(#scissorsGradient2)"/>
+  
+  <!-- Scissors blades -->
+  <path d="M12 12 L20 20 L18 22 L10 14 Z" fill="url(#scissorsGradient1)"/>
+  <path d="M20 12 L12 20 L14 22 L22 14 Z" fill="url(#scissorsGradient2)"/>
+  
+  <!-- Center pivot -->
+  <circle cx="16" cy="16" r="2" fill="white"/>
+</svg>
