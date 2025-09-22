@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Scissors, Eye, EyeOff } from 'lucide-react';
+import { Scissors, Eye, EyeOff, Home } from 'lucide-react';
 import { gsap } from 'gsap';
 
 const Login = () => {
@@ -142,6 +142,17 @@ const Login = () => {
               Email: admin@admin.com<br />
               Password: 12345678
             </p>
+          </div>
+
+          {/* Go Home Button */}
+          <div className="mt-4 text-center">
+            <Link 
+              to="/" 
+              className="inline-flex items-center space-x-2 text-gray-600 hover:text-primary-600 transition-colors duration-200 text-sm font-medium"
+            >
+              <Home className="w-4 h-4" />
+              <span>Go to Home</span>
+            </Link>
           </div>
         </div>
       </div>

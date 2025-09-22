@@ -38,7 +38,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  const API_BASE_URL = 'http://localhost:8000';
+  const API_BASE_URL = 'https://bria-server.vercel.app';
 
   useEffect(() => {
     fetchServices();
@@ -148,6 +148,16 @@ const Home = () => {
       ]);
     } finally {
       setReviewsLoading(false);
+    }
+  };
+
+  const scrollToServices = () => {
+    const servicesSection = document.getElementById('services');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
   };
 
@@ -405,13 +415,13 @@ const Home = () => {
 
             {/* CTA Buttons */}
             <div className="hero-buttons flex flex-col sm:flex-row gap-6 justify-center items-center mb-32">
-              <Link 
-                to="/services" 
+              <button 
+                onClick={scrollToServices}
                 className="group bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 flex items-center space-x-3 text-lg shadow-lg hover:shadow-xl"
               >
                 <span>View Services</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
+              </button>
               <Link 
                 to="/book" 
                 className="group bg-white hover:bg-gray-50 text-gray-900 font-semibold py-4 px-8 rounded-xl border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 flex items-center space-x-3 text-lg shadow-lg hover:shadow-xl"
@@ -441,7 +451,7 @@ const Home = () => {
       </section>
 
       {/* Services Preview */}
-      <section className="services-section py-32 bg-white relative">
+      <section id="services" className="services-section py-32 bg-white relative">
         <div className="container mx-auto px-12">
           <div className="text-center mb-24">
             <div className="inline-flex items-center space-x-2 bg-primary-50 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
