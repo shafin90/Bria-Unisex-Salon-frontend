@@ -6,6 +6,7 @@ import {
   Calendar, 
   Gift, 
   Users, 
+  MessageSquare,
   X,
   LogOut
 } from 'lucide-react';
@@ -20,6 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/admin/bookings', icon: Calendar, label: 'Bookings' },
     { path: '/admin/offers', icon: Gift, label: 'Offers' },
     { path: '/admin/users', icon: Users, label: 'Users' },
+    { path: '/admin/reviews', icon: MessageSquare, label: 'Reviews' },
   ];
 
   const handleLogout = () => {

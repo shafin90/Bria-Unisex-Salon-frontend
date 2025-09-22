@@ -34,12 +34,15 @@ const Home = () => {
   const ctaRef = useRef(null);
 
   const [services, setServices] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   const API_BASE_URL = 'http://localhost:8000';
 
   useEffect(() => {
     fetchServices();
+    fetchReviews();
   }, []);
 
   const fetchServices = async () => {
@@ -98,29 +101,56 @@ const Home = () => {
     }
   };
 
-  const [testimonials] = useState([
-    {
-      name: 'Sarah Johnson',
-      text: 'Amazing service! The staff is professional and the results are always perfect.',
-      rating: 5,
-      service: 'Hair Color',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100'
-    },
-    {
-      name: 'Mike Chen',
-      text: 'Best salon in town. Clean, modern, and the stylists really know their craft.',
-      rating: 5,
-      service: 'Hair Cut',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'
-    },
-    {
-      name: 'Emma Davis',
-      text: 'Love coming here! The atmosphere is relaxing and the service is top-notch.',
-      rating: 5,
-      service: 'Facial Treatment',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100'
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/review/getApprovedReviews`, {
+        params: {
+          page: 1,
+          limit: 6 // Get up to 6 reviews for display
+        }
+      });
+      
+      if (response.data.success && response.data.reviews) {
+        const formattedReviews = response.data.reviews.map(review => ({
+          name: review.name,
+          text: review.review,
+          rating: review.rating,
+          service: 'Salon Service', // We can add service info later if needed
+          avatar: review.photo ? `${API_BASE_URL}${review.photo}` : 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100'
+        }));
+        setTestimonials(formattedReviews);
+      }
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      // Fallback to static testimonials if API fails
+      setTestimonials([
+        {
+          name: 'Sarah Johnson',
+          text: 'Amazing service! The staff is professional and the results are always perfect.',
+          rating: 5,
+          service: 'Hair Color',
+          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100'
+        },
+        {
+          name: 'Mike Chen',
+          text: 'Best salon in town. Clean, modern, and the stylists really know their craft.',
+          rating: 5,
+          service: 'Hair Cut',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100'
+        },
+        {
+          name: 'Emma Davis',
+          text: 'Love coming here! The atmosphere is relaxing and the service is top-notch.',
+          rating: 5,
+          service: 'Facial Treatment',
+          avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100'
+        }
+      ]);
+    } finally {
+      setReviewsLoading(false);
     }
-  ]);
+  };
+
 
   const [stats] = useState([
     { number: '500+', label: 'Happy Clients', icon: Heart },
@@ -546,33 +576,53 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="testimonial-card group">
-                <div className="bg-white rounded-2xl p-8 h-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-                  <div className="flex items-center mb-6">
-                    <img
-                      src={testimonial.avatar}
-                      alt={testimonial.name}
-                      className="w-12 h-12 rounded-full object-cover mr-4"
-                    />
-                    <div>
-                      <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                      <p className="text-gray-600 text-sm">{testimonial.service}</p>
+          {reviewsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              <span className="ml-3 text-gray-600">Loading reviews...</span>
+            </div>
+          ) : testimonials.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <div key={index} className="testimonial-card group">
+                  <div className="bg-white rounded-2xl p-8 h-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                    <div className="flex items-center mb-6">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-12 h-12 rounded-full object-cover mr-4"
+                      />
+                      <div>
+                        <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
+                        <p className="text-gray-600 text-sm">{testimonial.service}</p>
+                      </div>
                     </div>
+                    
+                    <div className="flex items-center mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    
+                    <p className="text-gray-700 italic leading-relaxed">"{testimonial.text}"</p>
                   </div>
-                  
-                  <div className="flex items-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  
-                  <p className="text-gray-700 italic leading-relaxed">"{testimonial.text}"</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
+              <p className="text-gray-600 mb-6">Be the first to share your experience with us!</p>
+              <Link
+                to="/review"
+                className="inline-flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+              >
+                <Star className="w-5 h-5" />
+                <span>Write a Review</span>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 

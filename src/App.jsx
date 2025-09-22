@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import PublicLayout from './components/Public/PublicLayout';
 import Home from './pages/Public/Home';
 import BookAppointment from './pages/Public/BookAppointment';
+import SubmitReview from './pages/Public/SubmitReview';
 
 // Admin Components
 import Layout from './components/Layout/Layout';
@@ -16,6 +17,7 @@ import Services from './pages/Services/Services';
 import Bookings from './pages/Bookings/Bookings';
 import Offers from './pages/Offers/Offers';
 import Users from './pages/Users/Users';
+import Reviews from './pages/Reviews/Reviews';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -50,6 +52,11 @@ function AppContent() {
               <BookAppointment />
             </PublicLayout>
           } />
+          <Route path="/review" element={
+            <PublicLayout>
+              <SubmitReview />
+            </PublicLayout>
+          } />
 
           {/* Admin Routes */}
           <Route path="/admin/login" element={<Login />} />
@@ -64,6 +71,7 @@ function AppContent() {
                   <Route path="/bookings" element={<Bookings />} />
                   <Route path="/offers" element={<Offers />} />
                   <Route path="/users" element={<Users />} />
+                  <Route path="/reviews" element={<Reviews />} />
                   <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
                 </Routes>
               </Layout>

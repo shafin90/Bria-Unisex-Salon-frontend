@@ -25,6 +25,7 @@ const PublicLayout = ({ children }) => {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'Book Appointment', href: '/book' },
+    { name: 'Submit Review', href: '/review' },
   ];
 
   return (

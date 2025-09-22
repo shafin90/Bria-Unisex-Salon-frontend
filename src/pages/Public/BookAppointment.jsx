@@ -14,7 +14,8 @@ import {
   Trash2,
   Plus,
   Star,
-  Users
+  Users,
+  Download
 } from 'lucide-react';
 import axios from 'axios';
 import { useCart } from '../../context/CartContext';
@@ -38,6 +39,7 @@ const BookAppointment = () => {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState(null);
   const [services, setServices] = useState([]);
   const [servicesLoading, setServicesLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,8 +105,9 @@ const BookAppointment = () => {
 
       const response = await axios.post(`${API_BASE_URL}/booking/addBooking`, bookingData);
       
-      if (response.data) {
+      if (response.data && response.data.bookingAdded) {
         setSuccess(true);
+        setBookingId(response.data.bookingAdded._id);
         clearCart();
         setFormData({
           name: '',
@@ -127,6 +130,39 @@ const BookAppointment = () => {
       return formData.service.reduce((total, service) => total + service.servicePrice, 0);
     }
     return getCartTotal();
+  };
+
+  const downloadTicket = async () => {
+    if (!bookingId) {
+      alert('No booking found to download ticket');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/booking/generateTicket/${bookingId}`, {
+        responseType: 'blob'
+      });
+
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from response headers or use default
+      const contentDisposition = response.headers['content-disposition'];
+      const filename = contentDisposition 
+        ? contentDisposition.split('filename=')[1] 
+        : 'booking-ticket.pdf';
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading ticket:', error);
+      alert('Failed to download ticket. Please try again.');
+    }
   };
 
   const getMinDate = () => {
@@ -161,6 +197,13 @@ const BookAppointment = () => {
             Your appointment has been successfully booked. You will receive a confirmation message shortly.
           </p>
           <div className="space-y-3">
+            <button
+              onClick={downloadTicket}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+            >
+              <Download className="w-5 h-5" />
+              <span>Download Ticket (PDF)</span>
+            </button>
             <button
               onClick={() => navigate('/')}
               className="btn-primary w-full"
