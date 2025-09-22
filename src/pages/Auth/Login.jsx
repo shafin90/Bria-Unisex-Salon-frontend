@@ -139,7 +139,7 @@ const Login = () => {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 text-center">
               <strong>Demo Credentials:</strong><br />
-              Email: admin@gmail.com<br />
+              Email: admin@admin.com<br />
               Password: 12345678
             </p>
           </div>

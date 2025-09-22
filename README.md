@@ -96,7 +96,7 @@ Update the API base URL in the following files:
 Change `API_BASE_URL` from `http://localhost:8000` to your backend URL.
 
 ### Demo Credentials
-- **Email**: admin@gmail.com
+- **Email**: admin@admin.com
 - **Password**: 12345678
 
 ## 🎨 Design System

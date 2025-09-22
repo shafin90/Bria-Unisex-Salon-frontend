@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('authToken');
     if (token) {
       setIsAuthenticated(true);
-      setUser({ email: 'admin@gmail.com' }); // Default admin user
+      setUser({ email: 'admin@admin.com' }); // Default admin user
     }
     setLoading(false);
   };
