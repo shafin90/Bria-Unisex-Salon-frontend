@@ -2,6 +2,14 @@
 
 A modern, responsive admin dashboard for Bria Unisex Salon management system built with React, Vite, Tailwind CSS, and GSAP.
 
+## 🌐 Live Demo
+
+**Live Application**: [https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/](https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/)
+
+**Demo Credentials**:
+- **Email**: admin@gmail.com
+- **Password**: 12345678
+
 ## 🚀 Features
 
 ### 🎨 Modern UI/UX
@@ -96,7 +104,7 @@ Update the API base URL in the following files:
 Change `API_BASE_URL` from `http://localhost:8000` to your backend URL.
 
 ### Demo Credentials
-- **Email**: admin@admin.com
+- **Email**: admin@gmail.com
 - **Password**: 12345678
 
 ## 🎨 Design System
@@ -132,13 +140,17 @@ Change `API_BASE_URL` from `http://localhost:8000` to your backend URL.
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Current Deployment
+The application is currently deployed on **Vercel** and accessible at:
+[https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/](https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/)
+
+### Vercel Deployment Steps
 1. Connect your GitHub repository to Vercel
 2. Set build command: `npm run build`
 3. Set output directory: `dist`
 4. Deploy automatically on push
 
-### Netlify
+### Netlify Alternative
 1. Build the project: `npm run build`
 2. Upload the `dist` folder to Netlify
 3. Configure redirects for SPA routing
@@ -178,6 +190,12 @@ This project is licensed under the MIT License.
 ## 📞 Support
 
 For support and questions, please contact the development team.
+
+## 🔗 Quick Links
+
+- **Live Application**: [https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/](https://bria-unisex-salon-frontend-xo2d-pz6jodvx2-shafin90s-projects.vercel.app/)
+- **Backend API Documentation**: See `bria_server_/readme.md`
+- **Repository**: [GitHub Repository](https://github.com/your-username/bria-salon)
 
 ---
 
