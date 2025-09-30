@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { authService } from '../services';
 
 const AuthContext = createContext();
 
@@ -16,16 +16,13 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // API base URL - update this to match your backend
-  const API_BASE_URL = 'http://localhost:8000';
-
   useEffect(() => {
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = () => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
+    const isAuth = authService.isAuthenticated();
+    if (isAuth) {
       setIsAuthenticated(true);
       setUser({ email: 'admin@admin.com' }); // Default admin user
     }
@@ -34,13 +31,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/adminLogin/adminLogin`, {
-        email,
-        password
-      });
+      const response = await authService.login(email, password);
 
-      if (response.data.success) {
-        localStorage.setItem('authToken', 'admin-token');
+      if (response.success) {
+        authService.setToken('admin-token');
         setIsAuthenticated(true);
         setUser({ email });
         return { success: true };
@@ -54,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    authService.removeToken();
     setIsAuthenticated(false);
     setUser(null);
   };
